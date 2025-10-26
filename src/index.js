@@ -1,31 +1,46 @@
-import "./test.js";
+import "./styles/index.css";
+import Meteo from "./model/meteo.js";
+import VMMeteo from "./model/VMmeteo.js";
 
-console.log("Weather app");
+const meteo = new Meteo();
+const vmmeteo = new VMMeteo(meteo);
 
-const KEY = "G68GFGKVW4WNQHG4WESJWAUKV";
+// bindings
+vmmeteo.bindTodayWeather({
+  city: document.querySelector(".today-weather__location"),
+  description: document.querySelector(".today-weather__desc"),
+  temperature: document.querySelector(".today-weather__temp span"),
+  icon: document.querySelector(".today-weather__icon img"),
+});
 
-const url = "https://weather.visualcrossing.com/VisualCrossingWebServices";
+vmmeteo.bindAirConditions({
+  realFeel: document.querySelector("[data-bind=realFeel]"),
+  wind: document.querySelector("[data-bind=wind]"),
+  rain: document.querySelector("[data-bind=rain]"),
+  uvIndex: document.querySelector("[data-bind=uvIndex]"),
+});
 
-const location = "paris";
-const date1 = "2025-10-23";
-const date2 = "2025-10-30";
+vmmeteo.bindTodayForecast(document.querySelector(".today-forecast__info"));
 
-const tryUrl = `https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${location}/${date1}/${date2}?key=${KEY}`;
+// listeners
+const button = document.querySelector(".search__button");
+const input = document.querySelector(".search__input");
 
-// `/rest/services/timeline/${encodeURIComponent(e)}?unitGroup=${t}&key=${this.#x}`
-
-function download(text, name, type) {
-  var a = document.createElement("a");
-  var file = new Blob([text], { type: type });
-  a.href = URL.createObjectURL(file);
-  a.download = name;
-  a.click();
-  a.remove();
+function update() {
+  const location = input.value || "paris";
+  vmmeteo.updateTodayWeather(location);
+  vmmeteo.updateAirConditions(location);
+  vmmeteo.updateTodayForecast(location);
+  meteo.isNight(location).then((is_night) => {
+    if (is_night) document.body.classList.remove("light-theme");
+    else document.body.classList.add("light-theme");
+  });
 }
 
-// fetch(tryUrl)
-//   .then((data) => data.json())
-//   .then((data) => {
-//     const content = JSON.stringify(data);
-//     download(content, 'meteo.json', 'application/json');
-//   });
+button.addEventListener("click", () => update());
+input.addEventListener("keypress", (event) => {
+  if (event.key === "Enter") update();
+});
+
+// first load
+update();
