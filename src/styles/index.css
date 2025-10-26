@@ -53,7 +53,7 @@ body {
   grid-template-rows: min-content;
   gap: 20px;
   padding: 20px;
-  width: max(900px, 80%);
+  width: clamp(500px, 80%, 1060px);
   margin: auto;
   min-height: 100vh;
   box-sizing: border-box;
